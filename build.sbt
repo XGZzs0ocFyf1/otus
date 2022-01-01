@@ -18,4 +18,6 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.scalameta" %% "scalameta" % "4.4.31"
 
+assembly / assemblyJarName := ""
+
 

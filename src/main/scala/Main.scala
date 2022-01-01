@@ -1,43 +1,37 @@
+import dto.CountryDto
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import io.circe.syntax._
 import model.Country
 
-import java.nio.file.{Files, Path}
+import scala.io.Source
 
-object Main extends App{
-  import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
-
-  sealed trait Foo
-  case class Bar(xs: Vector[String]) extends Foo
-  case class Qux(i: Int, d: Option[Double]) extends Foo
-
-  val foo: Foo = Qux(13, Some(14.0))
-
-  val json = foo.asJson.noSpaces
+object Main extends App {
+  val url = "https://raw.githubusercontent.com/mledoze/countries/master/countries.json"
+  val resource = Source.fromURL(url)
+  val json = try {
+    val data = resource.mkString
+    val decoded = decode[List[Country]](data)
+    decoded match {
+      case Right(value) =>
+        value
+          .filter(_.region == "Africa")
+          .sortBy(_.area)(Ordering[Double].reverse)
+          .slice(0, 10)
+          .map(CountryDto.createDto)
+          .asJson
+          .noSpaces
+      case Left(value) => throw new RuntimeException(s"Parsing problems: $value")
+    }
+  } finally {
+    resource.close
+  }
   println(json)
 
-  val decodedFoo = decode[Foo](json)
-  println(decodedFoo)
-
-
-  val input = Files.readString( Path.of("single.json"))
- // println(s"input size = ${input.size()}")
-
-  val sample = input.substring(200)
-  println(s"Фрагмент прочитанный из файла $sample")
-
-  val a = parse(sample).getOrElse(Json.Null)
-  println(s" a = $a")
-//
-//  decode[List[Country]](input) match {
-//    case Left(value) => println("Не получилось распарсить строку")
-//    case Right(value) =>
-//      println("Получилось распарсить строку")
-//      println(value.size)
-//  }
-
-
-
-
+//TODO write json to file
+//  Files.write(Paths.get("lowered"), lower.getBytes())
 
 
 
 }
+
