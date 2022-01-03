@@ -5,8 +5,10 @@ import io.circe.syntax._
 import model.Country
 
 import scala.io.Source
+import scala.language.implicitConversions
 
 object Main extends App {
+  implicit def toDto(c: Country): CountryDto = CountryDto.createDto(c)
   val url = "https://raw.githubusercontent.com/mledoze/countries/master/countries.json"
   val resource = Source.fromURL(url)
   val json = try {
@@ -18,7 +20,6 @@ object Main extends App {
           .filter(_.region == "Africa")
           .sortBy(_.area)(Ordering[Double].reverse)
           .slice(0, 10)
-          .map(CountryDto.createDto)
           .asJson
           .noSpaces
       case Left(value) => throw new RuntimeException(s"Parsing problems: $value")
