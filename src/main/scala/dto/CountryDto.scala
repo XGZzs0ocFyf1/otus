@@ -9,7 +9,7 @@ case class CountryDto(
 )
 
 object CountryDto {
-  def createDto(country: Country) =
+  def createDto(country: Country): CountryDto =
     CountryDto(
       name = country.name.common,
       capital = country.capital.head,
